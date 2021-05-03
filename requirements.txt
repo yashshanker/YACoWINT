@@ -26,6 +26,7 @@ python-multipart==0.0.5
 PyYAML==5.4.1
 regex==2021.4.4
 six==1.15.0
+slack-sdk==3.5.1
 SQLAlchemy==1.4.12
 starlette==0.13.6
 toml==0.10.2

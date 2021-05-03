@@ -10,17 +10,14 @@ init:
 	pre-commit install
 
 format:
-	@. .envrc
-	. venv/bin/activate
-	@isort -rc server/
+	@. venv/bin/activate
+	isort -rc server/
 	black server/
 
 lint:
-	@. .envrc
-	. venv/bin/activate
-	@flake8 server/
+	@. venv/bin/activate
+	flake8 server/
 
 start:
-	@. .envrc
-	. venv/bin/activate
-	@FLASK_ENV=development python -m server
+	@. venv/bin/activate
+	uvicorn --reload --port 8080 "server.app:app"
