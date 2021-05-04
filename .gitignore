@@ -129,3 +129,6 @@ dmypy.json
 
 # Docker .env files
 *.env
+
+# .envrc files
+*.envrc

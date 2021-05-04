@@ -5,7 +5,7 @@ import requests
 from server import config
 
 
-def district_by_calendar(district_id, weeks=1):
+def district_by_calendar(district_id, weeks=config.TRACK_WEEKS_DEFAULT):
     today = datetime.now(config.TZ)
     available = []
 

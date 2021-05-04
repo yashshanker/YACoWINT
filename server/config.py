@@ -1,11 +1,7 @@
 import datetime
 import os
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
-POSTGRES_HOST = os.environ["POSTGRES_HOST"]
+POSTGRES_HOST = os.environ.get("POSTGRES_HOST", "localhost")
 POSTGRES_PORT = os.environ["POSTGRES_PORT"]
 POSTGRES_DB = os.environ["POSTGRES_DB"]
 POSTGRES_USER = os.environ["POSTGRES_USER"]
@@ -19,3 +15,5 @@ POSTGRES_URI = (
 SLACK_OAUTH_TOKEN = os.environ["SLACK_OAUTH_TOKEN"]
 
 TZ = datetime.timezone(datetime.timedelta(minutes=330), name="Asia/Kolkata")
+
+TRACK_WEEKS_DEFAULT = int(os.environ.get("TRACK_WEEKS_DEFAULT", "1"))

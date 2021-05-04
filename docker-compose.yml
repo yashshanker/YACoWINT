@@ -7,6 +7,14 @@ services:
       - "8080:80"
     depends_on:
       - database
+    environment:
+      POSTGRES_HOST: database
+      POSTGRES_PORT: $POSTGRES_PORT
+      POSTGRES_DB: $POSTGRES_DB
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      SLACK_OAUTH_TOKEN: $SLACK_OAUTH_TOKEN
+      TRACK_WEEKS_DEFAULT: $TRACK_WEEKS_DEFAULT
 
   database:
     image: postgres:9.4

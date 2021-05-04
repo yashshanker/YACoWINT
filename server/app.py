@@ -3,6 +3,7 @@ import json
 from fastapi import Depends, FastAPI, Request, Response, status
 from sqlalchemy.orm import Session
 
+from server import config
 from server.cowin.availability import district_by_calendar
 from server.cowin.metadata import district_options, state_options
 from server.slack import client, modals
@@ -104,7 +105,10 @@ def notify(db: Session = Depends(session.get_db)):
 
         centers_markdown = format_centers_markdown(available_centers)
         for subscription in region.subscriptions:
-            intro = f"<@{subscription.slack_id}>, found a few slots:\n"
+            intro = (
+                f"<@{subscription.slack_id}>, found a few slots "
+                f"over the next {config.TRACK_WEEKS_DEFAULT} week(s):\n"
+            )
             response = client.conversations_open(users=[subscription.slack_id])
             channel_id = response["channel"]["id"]
             client.chat_postMessage(channel=channel_id, text=intro + centers_markdown)
