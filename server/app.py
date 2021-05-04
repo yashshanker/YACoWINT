@@ -3,14 +3,22 @@ import json
 from fastapi import Depends, FastAPI, Request, Response, status
 from sqlalchemy.orm import Session
 
+from server.cowin.availability import district_by_calendar
 from server.cowin.metadata import district_options, state_options
-from server.logger import log
 from server.slack import client, modals
 from server.storage import crud, models, session
+from server.utils import format_centers_markdown
 
 models.Base.metadata.create_all(bind=session.engine)
 
 app = FastAPI()
+
+
+@app.post("/subscribe")
+async def subscribe(request: Request, db: Session = Depends(session.get_db)):
+    data = await request.form()
+    client.views_open(trigger_id=data["trigger_id"], view=modals.subscription_modal())
+    return Response(status_code=status.HTTP_200_OK)
 
 
 @app.post("/interact")
@@ -18,7 +26,6 @@ async def interact(request: Request, db: Session = Depends(session.get_db)):
     data = await request.form()
     payload = json.loads(data["payload"])
     view = payload["view"]
-    log.info("Interact payload: %s", json.dumps(payload))
 
     if payload["type"] == "view_submission":
         metadata = json.loads(view["private_metadata"])
@@ -91,18 +98,13 @@ def notify(db: Session = Depends(session.get_db)):
         if not len(region.subscriptions):
             continue
 
-    return [
-        {
-            "state": region.state_id,
-            "district": region.district_id,
-            "subscribers": [s.slack_id for s in region.subscriptions],
-        }
-        for region in regions
-    ]
+        available_centers = district_by_calendar(region.district_id)
+        if not available_centers:
+            continue
 
-
-@app.post("/subscribe")
-async def subscribe(request: Request, db: Session = Depends(session.get_db)):
-    data = await request.form()
-    client.views_open(trigger_id=data["trigger_id"], view=modals.subscription_modal())
-    return Response(status_code=status.HTTP_200_OK)
+        centers_markdown = format_centers_markdown(available_centers)
+        for subscription in region.subscriptions:
+            intro = f"<@{subscription.slack_id}>, found a few slots:\n"
+            response = client.conversations_open(users=[subscription.slack_id])
+            channel_id = response["channel"]["id"]
+            client.chat_postMessage(channel=channel_id, text=intro + centers_markdown)

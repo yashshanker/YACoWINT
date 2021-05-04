@@ -1,3 +1,4 @@
+import datetime
 import os
 
 from dotenv import load_dotenv
@@ -16,3 +17,5 @@ POSTGRES_URI = (
 )
 
 SLACK_OAUTH_TOKEN = os.environ["SLACK_OAUTH_TOKEN"]
+
+TZ = datetime.timezone(datetime.timedelta(minutes=330), name="Asia/Kolkata")
