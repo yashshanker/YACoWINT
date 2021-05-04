@@ -1,5 +1,6 @@
 import json
 
+from server import config
 from server.storage.models import SlackUserSubscription
 
 
@@ -61,8 +62,11 @@ def subscription_modal(state_option=None, district_option=None):
 
 
 def successful_subscription_modal(subscription: SlackUserSubscription):
-    region = subscription.region
-    response = f"Subscribed for slots at *{region.district_id}, {region.state_id}*!"
+    response = (
+        "Subscribed! You will be notified on Slack whenever an available slot is found"
+        f" over the next {config.TRACK_WEEKS_DEFAULT} week(s) period each day, in"
+        " you chosen region. To unsubscribe from all notifications, run `/cowin unsub`."
+    )
 
     return {
         "type": "modal",

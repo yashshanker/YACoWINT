@@ -1,0 +1,7 @@
+{
+    email {$CADDY_EMAIL}
+}
+
+{$CADDY_HOST} {
+    reverse_proxy {$CADDY_LOCAL_SERVER}
+}

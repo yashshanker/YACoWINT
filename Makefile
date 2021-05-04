@@ -20,4 +20,9 @@ lint:
 
 start:
 	@. venv/bin/activate
+	. .envrc
 	uvicorn --reload --port 8080 "server.app:app"
+
+services:
+	@. .envrc
+	docker-compose up --build

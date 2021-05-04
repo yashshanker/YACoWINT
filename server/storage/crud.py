@@ -40,3 +40,8 @@ def add_subscription(
     db.refresh(subscription)
 
     return subscription
+
+
+def remove_subscriptions(db: Session, slack_id: str):
+    db.query(models.SlackUserSubscription).filter_by(slack_id=slack_id).delete()
+    db.commit()

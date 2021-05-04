@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from server import config
 from server.cowin.availability import district_by_calendar
 from server.cowin.metadata import district_options, state_options
-from server.slack import client, modals
+from server.slack import client, modals, signature_verifier
 from server.storage import crud, models, session
 from server.utils import format_centers_markdown
 
@@ -17,13 +17,23 @@ app = FastAPI()
 
 @app.post("/subscribe")
 async def subscribe(request: Request, db: Session = Depends(session.get_db)):
+    if not signature_verifier.is_valid_request(await request.body(), request.headers):
+        return Response(status_code=status.HTTP_403_FORBIDDEN)
+
     data = await request.form()
+    if data.get("text", "").lower().strip() == "unsub":
+        crud.remove_subscriptions(db, data["user_id"])
+        return Response("Unsubscribed!", status_code=status.HTTP_200_OK)
+
     client.views_open(trigger_id=data["trigger_id"], view=modals.subscription_modal())
     return Response(status_code=status.HTTP_200_OK)
 
 
 @app.post("/interact")
 async def interact(request: Request, db: Session = Depends(session.get_db)):
+    if not signature_verifier.is_valid_request(await request.body(), request.headers):
+        return Response(status_code=status.HTTP_403_FORBIDDEN)
+
     data = await request.form()
     payload = json.loads(data["payload"])
     view = payload["view"]
@@ -68,6 +78,9 @@ async def interact(request: Request, db: Session = Depends(session.get_db)):
 
 @app.post("/options")
 async def options(request: Request):
+    if not signature_verifier.is_valid_request(await request.body(), request.headers):
+        return Response(status_code=status.HTTP_403_FORBIDDEN)
+
     data = await request.form()
     payload = json.loads(data["payload"])
     action_id = payload["action_id"]

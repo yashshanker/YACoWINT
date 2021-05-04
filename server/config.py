@@ -13,6 +13,7 @@ POSTGRES_URI = (
 )
 
 SLACK_OAUTH_TOKEN = os.environ["SLACK_OAUTH_TOKEN"]
+SLACK_SIGNING_SECRET = os.environ["SLACK_SIGNING_SECRET"]
 
 TZ = datetime.timezone(datetime.timedelta(minutes=330), name="Asia/Kolkata")
 
