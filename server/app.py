@@ -15,6 +15,11 @@ models.Base.metadata.create_all(bind=session.engine)
 app = FastAPI()
 
 
+@app.get("/health")
+def health():
+    return Response(status_code=status.HTTP_200_OK)
+
+
 @app.post("/subscribe")
 async def subscribe(request: Request, db: Session = Depends(session.get_db)):
     if not signature_verifier.is_valid_request(await request.body(), request.headers):
