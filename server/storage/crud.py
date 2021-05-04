@@ -26,10 +26,15 @@ def add_subscription(db: Session, slack_id: str, state: str, district: str):
     if region is None:
         region = add_region(db, state, district)
 
+    # Check if user is already subscribed to this region
+    for subscriber in region.subscribers:
+        if subscriber.slack_id == slack_id:
+            return subscriber
+
     subscription = models.SlackUserSubscription(slack_id=slack_id, region_id=region.id)
 
     db.add(subscription)
     db.commit()
-    db.refresh()
+    db.refresh(subscription)
 
     return subscription
