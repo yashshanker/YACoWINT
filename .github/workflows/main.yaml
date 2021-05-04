@@ -2,8 +2,8 @@ name: CI to Docker Hub
 
 on:
   push:
-    tags:
-      - "v*.*.*"
+    push:
+      branches: [ main ]
 
 jobs:
 
