@@ -7,8 +7,8 @@ def get_regions(db: Session):
     return db.query(models.TrackingRegion).all()
 
 
-def add_region(db: Session, state: str, district: str):
-    region = models.TrackingRegion(state=state, district=district)
+def add_region(db: Session, state_id: str, district_id: str):
+    region = models.TrackingRegion(state_id=state_id, district_id=district_id)
 
     db.add(region)
     db.commit()
@@ -17,19 +17,21 @@ def add_region(db: Session, state: str, district: str):
     return region
 
 
-def add_subscription(db: Session, slack_id: str, state: str, district: str):
+def add_subscription(
+    db: Session, slack_id: str, state_id: str, district_id: str,
+):
     region = (
         db.query(models.TrackingRegion)
-        .filter_by(state=state, district=district)
+        .filter_by(state_id=state_id, district_id=district_id)
         .one_or_none()
     )
     if region is None:
-        region = add_region(db, state, district)
+        region = add_region(db, state_id, district_id)
 
     # Check if user is already subscribed to this region
-    for subscriber in region.subscribers:
-        if subscriber.slack_id == slack_id:
-            return subscriber
+    for subscription in region.subscriptions:
+        if subscription.slack_id == slack_id:
+            return subscription
 
     subscription = models.SlackUserSubscription(slack_id=slack_id, region_id=region.id)
 

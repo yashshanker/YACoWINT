@@ -14,10 +14,10 @@ class TrackingRegion(Base):
         primary_key=True,
         server_default=text("uuid_generate_v4()"),
     )
-    state = Column(String, index=True, nullable=False)
-    district = Column(String, index=True, nullable=False)
+    state_id = Column(String, index=True, nullable=False)
+    district_id = Column(String, index=True, nullable=False)
 
-    subscribers = relationship("SlackUserSubscription", back_populates="region")
+    subscriptions = relationship("SlackUserSubscription", back_populates="region")
 
 
 class SlackUserSubscription(Base):
@@ -32,4 +32,4 @@ class SlackUserSubscription(Base):
     slack_id = Column(String, index=True, nullable=False)
     region_id = Column(String, ForeignKey("tracking_regions.id"))
 
-    region = relationship("TrackingRegion", back_populates="subscribers")
+    region = relationship("TrackingRegion", back_populates="subscriptions")

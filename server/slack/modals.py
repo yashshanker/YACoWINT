@@ -62,7 +62,7 @@ def subscription_modal(state_option=None, district_option=None):
 
 def successful_subscription_modal(subscription: SlackUserSubscription):
     region = subscription.region
-    response = f"Subscribed for slots at *{region.district}, {region.state}*!"
+    response = f"Subscribed for slots at *{region.district_id}, {region.state_id}*!"
 
     return {
         "type": "modal",

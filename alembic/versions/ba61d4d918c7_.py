@@ -28,18 +28,21 @@ def upgrade():
             server_default=sa.text("uuid_generate_v4()"),
             nullable=False,
         ),
-        sa.Column("state", sa.String(), nullable=False),
-        sa.Column("district", sa.String(), nullable=False),
+        sa.Column("state_id", sa.String(), nullable=False),
+        sa.Column("district_id", sa.String(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(
-        op.f("ix_tracking_regions_district"),
+        op.f("ix_tracking_regions_district_id"),
         "tracking_regions",
-        ["district"],
+        ["district_id"],
         unique=False,
     )
     op.create_index(
-        op.f("ix_tracking_regions_state"), "tracking_regions", ["state"], unique=False
+        op.f("ix_tracking_regions_state_id"),
+        "tracking_regions",
+        ["state_id"],
+        unique=False,
     )
     op.create_table(
         "slack_user_subscriptions",
@@ -70,7 +73,9 @@ def downgrade():
         table_name="slack_user_subscriptions",
     )
     op.drop_table("slack_user_subscriptions")
-    op.drop_index(op.f("ix_tracking_regions_state"), table_name="tracking_regions")
-    op.drop_index(op.f("ix_tracking_regions_district"), table_name="tracking_regions")
+    op.drop_index(op.f("ix_tracking_regions_state_id"), table_name="tracking_regions")
+    op.drop_index(
+        op.f("ix_tracking_regions_district_id"), table_name="tracking_regions"
+    )
     op.drop_table("tracking_regions")
     # ### end Alembic commands ###

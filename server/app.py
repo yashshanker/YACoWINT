@@ -1,9 +1,9 @@
 import json
 
-import requests
 from fastapi import Depends, FastAPI, Request, Response, status
 from sqlalchemy.orm import Session
 
+from server.cowin.metadata import district_options, state_options
 from server.logger import log
 from server.slack import client, modals
 from server.storage import crud, models, session
@@ -11,36 +11,6 @@ from server.storage import crud, models, session
 models.Base.metadata.create_all(bind=session.engine)
 
 app = FastAPI()
-
-
-def state_options():
-    response = requests.get(
-        "https://cdn-api.co-vin.in/api/v2/admin/location/states"
-    ).json()
-    options = [
-        {
-            "text": {"type": "plain_text", "text": state["state_name"]},
-            "value": f"state-{state['state_id']}",
-        }
-        for state in response.get("states")
-    ]
-
-    return options
-
-
-def district_options(state_id):
-    response = requests.get(
-        f"https://cdn-api.co-vin.in/api/v2/admin/location/districts/{state_id}"
-    ).json()
-    options = [
-        {
-            "text": {"type": "plain_text", "text": district["district_name"]},
-            "value": f"district-{district['district_id']}",
-        }
-        for district in response.get("districts")
-    ]
-
-    return options
 
 
 @app.post("/interact")
@@ -52,11 +22,14 @@ async def interact(request: Request, db: Session = Depends(session.get_db)):
 
     if payload["type"] == "view_submission":
         metadata = json.loads(view["private_metadata"])
-        state = metadata["state_option"]["text"]["text"]
-        district = metadata["district_option"]["text"]["text"]
 
         # Attempt to add a subscription
-        subscription = crud.add_subscription(db, payload["user"]["id"], state, district)
+        subscription = crud.add_subscription(
+            db,
+            payload["user"]["id"],
+            metadata["state_option"]["value"],
+            metadata["district_option"]["value"],
+        )
 
         return {
             "response_action": "update",
@@ -99,8 +72,7 @@ async def options(request: Request):
     elif action_id == "district_select":
         metadata = json.loads(payload["view"]["private_metadata"])
         state_option = metadata["state_option"]
-        prefix_offset = len("state-")
-        options = district_options(state_option["value"][prefix_offset:])
+        options = district_options(state_option["value"])
 
     return dict(
         options=[
@@ -114,11 +86,16 @@ async def options(request: Request):
 @app.post("/notify")
 def notify(db: Session = Depends(session.get_db)):
     regions = crud.get_regions(db)
+
+    for region in regions:
+        if not len(region.subscriptions):
+            continue
+
     return [
         {
-            "state": region.state,
-            "district": region.district,
-            "subscribers": [s.slack_id for s in region.subscribers],
+            "state": region.state_id,
+            "district": region.district_id,
+            "subscribers": [s.slack_id for s in region.subscriptions],
         }
         for region in regions
     ]
