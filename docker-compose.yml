@@ -3,6 +3,7 @@ version: "3"
 services:
   server:
     build: .
+    restart: unless-stopped
     ports:
       - "8080:80"
     depends_on:
@@ -19,6 +20,7 @@ services:
 
   database:
     image: postgres:9.4
+    restart: unless-stopped
     ports:
       - 5432:5432
     volumes:
@@ -28,8 +30,17 @@ services:
       POSTGRES_USER: $POSTGRES_USER
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
 
-  # caddy:
-  #   image: caddy:2.3.0-alpine
+  caddy:
+    image: caddy:2.3.0-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      CADDY_EMAIL: $CADDY_EMAIL
+      CADDY_HOST: $CADDY_HOST
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
 
 volumes:
   db_data:

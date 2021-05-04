@@ -3,5 +3,5 @@
 }
 
 {$CADDY_HOST} {
-    reverse_proxy {$CADDY_LOCAL_SERVER}
+    reverse_proxy server:80
 }

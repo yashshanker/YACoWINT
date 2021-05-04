@@ -1,0 +1,18 @@
+export POSTGRES_PORT=
+export POSTGRES_DB=
+export POSTGRES_USER=
+export POSTGRES_PASSWORD=
+
+export TRACK_WEEKS_DEFAULT=
+
+export SLACK_OAUTH_TOKEN=
+export SLACK_SIGNING_SECRET=
+
+export CADDY_EMAIL=
+export CADDY_HOST=
+
+export PGHOST=
+export PGPORT=
+export PGDB=
+export PGUSER=
+export PGPASSWORD=
